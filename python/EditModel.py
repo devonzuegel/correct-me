@@ -51,21 +51,19 @@ class EditModel(object):
     
     if len(word) <= 0:      return []
     word = "<" + word   # Append start character
-    print('word:  %s' % word)
-    ret = []
+
+    result = []
     for i in xrange(1, len(word)):
       # The corrupted signal are this character and the character preceding
       corruptLetters = word[i-1:i+1] 
       # The correct signal is just the preceding character
       correctLetters = corruptLetters[:-1]
-      print('corrupt: %s,   correct: %s' % (corruptLetters, correctLetters))
 
-      # The corrected word deletes character i (and lacks the start symbol)
+      # Corrected word deletes character i (& lacks start symbol <)
       correction = "%s%s" % (word[1:i], word[i+1:])
-      edit = Edit(correction, corruptLetters, correctLetters)
-      ret.append(edit)
+      result.append( Edit(correction, corruptLetters, correctLetters) )
       
-    return ret
+    return result
 
   ##
   # Returns a list of edits of 1-insert distance words and rules used to
@@ -80,29 +78,44 @@ class EditModel(object):
 
     if len(word) <= 0:      return []
     word = "<" + word   # Append start character
-    print('word:  %s' % word)
-    ret = []
+
+    result = []
     for i in xrange(1, len(word) + 1):
       for letter in EditModel.ALPHABET:
-        # The corrupted signal are this character and the character preceding
+        # The corrupted signal is the character preceding
         corruptLetters = word[i-1] 
-        # The correct signal is just the preceding character
+        # The correct signal is that preceding character + the new letter
         correctLetters = corruptLetters + letter
 
-        # The corrected word deletes character i (and lacks the start symbol)
+        # Corrected word inserts new letter (& lacks start symbol <)
         correction = "%s%s%s" % (word[1:i], letter, word[i:])
-        edit = Edit(correction, corruptLetters, correctLetters)
-        ret.append(edit)
+        result.append( Edit(correction, corruptLetters, correctLetters) )
       
-    return ret
+    return result
 
-
+  ##
+  # Returns a list of edits of 1-transpose distance words and rules
+  # used to generate them.
   def transposeEdits(self, word):
-    """Returns a list of edits of 1-transpose distance words and rules used to generate them."""
-    # TODO: write this
     # Tip: If tranposing letters 'te' in the word 'test', the corrupt signal is 'te'
     #      and the correct signal is 'et'. See slide 17 of the noisy channel model.
-    return []
+    #
+    # Examples:   Edit(editedWord=ih, rule=hi|ih)
+
+    result = []
+
+    for i in xrange(1, len(word)):
+      ##
+      # The corrupted signal are this character and the preceding
+      # character flipped
+      corruptLetters = word[i-1] + word [i]
+      correctLetters = corruptLetters[::-1]
+
+      # The corrected word deletes character i (and lacks the start symbol)
+      correction = "%s%s%s" % (word[0:i-1], correctLetters, word[i+1:])
+      result.append( Edit(correction, corruptLetters, correctLetters) )
+
+    return result
 
   ##
   # Returns a list of edits of 1-replace distance words and rules used to
@@ -112,7 +125,27 @@ class EditModel(object):
     # Tip: you might find EditModel.ALPHABET helpful
     # Tip: If replacing the letter 'e' with 'q' in the word 'test', the corrupt signal is 'e'
     #      and the correct signal is 'q'. See slide 17 of the noisy channel model.
-    return []
+    #
+    # Examples:   Edit(editedWord=hu, rule=i|u)
+    #             Edit(editedWord=ui, rule=h|u
+    if len(word) <= 0:      return []
+
+    result = []
+
+    for i in xrange(0, len(word)):
+      for letter in EditModel.ALPHABET:
+        # Corrected word replaces character i with letter
+        correction = word[:i] + letter + word[i+1:]
+
+        ##
+        # Only include true corrections (don't include cases where you replace
+        # a letter with itself)
+        if (correction != word):
+          result.append( Edit(correction, word[i], letter) )
+      
+    return result
+
+
 
   ##
   # Returns a list of tuples of 1-edit distance words and rules used to
@@ -154,8 +187,7 @@ def checkOverlap(edits, gold):
   percentage = 100 * float(len(edits & gold)) / len(gold)
   missing = gold - edits
   extra = edits - gold
-  for edit in edits:
-    print '- %s' % edit
+  for edit in edits:    print '- %s' % edit
   print "\tOverlap: %s%%" % percentage
   print "\tMissing edits: %s" % map(str, missing)
   print "\tExtra edits: %s" % map(str, extra)
@@ -190,10 +222,10 @@ def main():
   checkOverlap(set(editModel.deleteEdits('hi')), DELETE_EDITS)
   print "\n\nInsert edits for 'hi'"
   checkOverlap(set(editModel.insertEdits('hi')), INSERT_EDITS)
-  # print "\n\nTranspose edits for 'hi'"
-  # checkOverlap(set(editModel.transposeEdits('hi')), TRANPOSE_EDITS)
-  # print "\n\nReplace edits for 'hi'"
-  # checkOverlap(set(editModel.replaceEdits('hi')), REPLACE_EDITS)
+  print "\n\nTranspose edits for 'hi'"
+  checkOverlap(set(editModel.transposeEdits('hi')), TRANPOSE_EDITS)
+  print "\n\nReplace edits for 'hi'"
+  checkOverlap(set(editModel.replaceEdits('hi')), REPLACE_EDITS)
 
 if __name__ == "__main__":
   main()
