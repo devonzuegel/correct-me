@@ -1,23 +1,37 @@
 class LaplaceBigramLanguageModel:
 
+  # Initialize your data structures in the constructor.
   def __init__(self, corpus):
-    """Initialize your data structures in the constructor."""
+    self.unigramCounts = collections.defaultdict(lambda: 0)
+    self.total = 0
     self.train(corpus)
 
+  # Takes a HolbrookCorpus corpus, does whatever training is needed.
   def train(self, corpus):
-    """ Takes a corpus and trains your language model. 
-        Compute any counts or other corpus statistics in this function.
-    """  
-    # TODO your code here
-    # Tip: To get words from the corpus, try
-    #    for sentence in corpus.corpus:
-    #       for datum in sentence.data:  
-    #         word = datum.word
-    pass
+    for sentence in corpus.corpus:
+      print sentence
+      for datum in sentence.data:
+        token = datum.word
+        print token
+        self.unigramCounts[token] += 1
+        self.total += 1
+    self.unigramCounts['UNK'] = 0
 
+    # For each token, increment by 1 for Laplace smoothing
+    for token in self.unigramCounts:
+      self.unigramCounts[token] += 1
+      self.total += 1
+
+  
+  ##
+  # Takes a list of strings, returns a log-probability score of that
+  # sentence using data from train().
   def score(self, sentence):
-    """ Takes a list of strings as argument and returns the log-probability of the 
-        sentence using your language model. Use whatever data you computed in train() here.
-    """
-    # TODO your code here
-    return 0.0
+    score = 0.0 
+    for token in sentence:
+      count = self.unigramCounts[token] | self.unigramCounts['UNK']
+      if count > 0:
+        # Must add and subtract scores b/c **logs** of the scores
+        score += math.log(count) - math.log(self.total)
+      # Ignore unseen words
+    return score
