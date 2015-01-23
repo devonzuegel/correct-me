@@ -53,7 +53,7 @@ class SpellCorrect:
         edit = edit_possibilities[0][0]
         s2 = " ".join(sentence[i+1:len(sentence)])
         trialSentence = s1 + " " + edit + " " + s2
-        p(trialSentence)
+        print(trialSentence)
         ##
         # The log-probabilities will come out as negative, because we're
         # taking the logs of very small numbers. Still, a larger log-probab.
