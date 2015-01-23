@@ -35,47 +35,50 @@ class SpellCorrect:
   # Assuming exactly one error per sentence, returns the most
   # probable corrected sentence. Sentence is a list of words.
   def correctSentence(self, sentence):
+    # Tip: self.editModel.editProbabilities(word) gives edits and
+      # log-probabilities according to your edit model. You should iterate
+      # through these values instead of enumerating all edits.
+      #
+    # Tip: self.languageModel.score(trialSentence) gives log-probability
+      # of a sentence
+
+    ## Approach: ##
+    # iterate through the sentence
+    #   get the probabilities for each word
+    #   iterate through the edit options for each word
+    #     find the edit with the highest probability
+    #     plug that into the sentence
+    #     if the score of that sentence > score of the sentence without the swap
+    #       keep it as bestSentence
+
+
     if len(sentence) == 0:      return []
 
     bestSentence = sentence[:]   # copy of sentence
     bestScore = float('-inf')
     
-    # print ' '.join(sentence)
-
     for i in xrange(1, len(sentence) - 1):   # ignore <s> and </s>
-      # Selects max probability sentence, according to noisy channel model.
+      #### Select max probability sentence, according to noisy channel model.
 
       edit_possibilities = self.editModel.editProbabilities(sentence[i])
-      # for edit in edit_possibilities:
-      #   print edit
-      if len(edit_possibilities) > 0:
-        s1 = " ".join(sentence[:i])
-        edit = edit_possibilities[0][0]
-        s2 = " ".join(sentence[i+1:len(sentence)])
-        trialSentence = s1 + " " + edit + " " + s2
-        print(trialSentence)
+      for edit in edit_possibilities:
+        trialSentence = sentence[:i] + [edit[0]] + sentence[i+1:] 
+
         ##
         # The log-probabilities will come out as negative, because we're
-        # taking the logs of very small numbers. Still, a larger log-probab.
-        # is a "higher score". For instance, -3 indicates a higher probability
-        # than -223802.
-        curr_score = self.languageModel.score(trialSentence)
+          # taking the logs of very small numbers. Still, a larger log-probab.
+          # is a "higher score". For instance, -3 indicates a higher probability
+          # than -223802.
+        curr_score = self.languageModel.score(trialSentence) + edit[1]
         if (bestScore < curr_score):
           bestScore = curr_score
-          bestSentence = trialSentence
+          bestSentence = trialSentence[:]
 
-      #
-      # Tip: self.editModel.editProbabilities(word) gives edits and
-      # log-probabilities according to your edit model. You should iterate
-      # through these values instead of enumerating all edits.
-      #
-      # Tip: self.languageModel.score(trialSentence) gives log-probability
-      # of a sentence
+    # print sentence
+    # print bestSentence
+    # print bestScore
+    # print ('\n----------\n')
 
-    # print self.languageModel.score(' '.join(bestSentence))
-    # print(bestSentence)
-
-    print ('\n----------\n')
     return bestSentence
 
   # Tests this speller on a corpus, returns a SpellingResult
@@ -84,12 +87,10 @@ class SpellCorrect:
     numTotal = 0
     testData = corpus.generateTestCases()
     for sentence in testData:
-      if sentence.isEmpty():
-        continue
+      if sentence.isEmpty():  continue
       errorSentence = sentence.getErrorSentence()
       hypothesis = self.correctSentence(errorSentence)
-      if sentence.isCorrection(hypothesis):
-        numCorrect += 1
+      if sentence.isCorrection(hypothesis):   numCorrect += 1
       numTotal += 1
     return SpellingResult(numCorrect, numTotal)
 
@@ -109,8 +110,8 @@ class SpellCorrect:
 
 ##
 # Trains all of the language models and tests them on the dev data.
-# Change devPath if you wish to do things like test on the training
-# data.
+  # Change devPath if you wish to do things like test on the training
+  # data.
 def main():
   trainPath = '../data/holbrook-tagged-train.dat'
   trainingCorpus = HolbrookCorpus(trainPath)
@@ -124,11 +125,11 @@ def main():
   unigramOutcome = unigramSpell.evaluate(devCorpus)
   print str(unigramOutcome)
 
-  # print 'Uniform Language Model: '
-  # uniformLM = UniformLanguageModel(trainingCorpus)
-  # uniformSpell = SpellCorrect(uniformLM, trainingCorpus)
-  # uniformOutcome = uniformSpell.evaluate(devCorpus) 
-  # print str(uniformOutcome)
+  print 'Uniform Language Model: '
+  uniformLM = UniformLanguageModel(trainingCorpus)
+  uniformSpell = SpellCorrect(uniformLM, trainingCorpus)
+  uniformOutcome = uniformSpell.evaluate(devCorpus) 
+  print str(uniformOutcome)
 
   # print 'Laplace Unigram Language Model: ' 
   # laplaceUnigramLM = LaplaceUnigramLanguageModel(trainingCorpus)

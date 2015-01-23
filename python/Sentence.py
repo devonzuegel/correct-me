@@ -24,8 +24,14 @@ class Sentence:
       correctSentence.append(datum.word)
     return correctSentence
 
+  # Checks if a list of strings is a correction of this sentence.
   def isCorrection(self, candidate):
-    """Checks if a list of strings is a correction of this sentence."""
+    # solution = ''
+    # for i in range(0,len(self.data)): 
+    #   solution += str(self.data[i]) + ' '
+    # print self.data
+    # print candidate
+    # print ''
     if len(self.data) != len(candidate):
       return False
     for i in range(0,len(self.data)):

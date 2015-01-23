@@ -77,7 +77,7 @@ class EditModel(object):
     #             Edit(editedWord=hia, rule=i|ia)
 
     if len(word) <= 0:      return []
-    word = "<" + word   # Append start character
+    word = "<" + word    # Append start character
 
     result = []
     for i in xrange(1, len(word) + 1):
@@ -87,7 +87,7 @@ class EditModel(object):
         # The correct signal is that preceding character + the new letter
         correctLetters = corruptLetters + letter
 
-        # Corrected word inserts new letter (& lacks start symbol <)
+        # Corrected word inserts new letter (and lacks start symbol <)
         correction = "%s%s%s" % (word[1:i], letter, word[i:])
         result.append( Edit(correction, corruptLetters, correctLetters) )
       
