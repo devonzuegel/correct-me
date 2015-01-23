@@ -23,7 +23,6 @@ class UnigramLanguageModel:
       count = self.unigramCounts[token]
       if count > 0:
         # Must add and subtract scores b/c **logs** of the scores
-        score += math.log(count)
-        score -= math.log(self.total)
+        score += math.log(count) - math.log(self.total)
       # Ignore unseen words
     return score
