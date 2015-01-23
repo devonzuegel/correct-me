@@ -35,19 +35,47 @@ class SpellCorrect:
   # Assuming exactly one error per sentence, returns the most
   # probable corrected sentence. Sentence is a list of words.
   def correctSentence(self, sentence):
-    if len(sentence) == 0:
-      return []
+    if len(sentence) == 0:      return []
 
     bestSentence = sentence[:]   # copy of sentence
     bestScore = float('-inf')
     
-    for i in xrange(1, len(sentence) - 1): # ignore <s> and </s>
-      # TODO: select the maximum probability sentence here, according to the noisy channel model.
-      # Tip: self.editModel.editProbabilities(word) gives edits and log-probabilities according to your edit model.
-      #      You should iterate through these values instead of enumerating all edits.
-      # Tip: self.languageModel.score(trialSentence) gives log-probability of a sentence
-      pass
+    # print ' '.join(sentence)
 
+    for i in xrange(1, len(sentence) - 1):   # ignore <s> and </s>
+      # Selects max probability sentence, according to noisy channel model.
+
+      edit_possibilities = self.editModel.editProbabilities(sentence[i])
+      # for edit in edit_possibilities:
+      #   print edit
+      if len(edit_possibilities) > 0:
+        s1 = " ".join(sentence[:i])
+        edit = edit_possibilities[0][0]
+        s2 = " ".join(sentence[i+1:len(sentence)])
+        trialSentence = s1 + " " + edit + " " + s2
+        p(trialSentence)
+        ##
+        # The log-probabilities will come out as negative, because we're
+        # taking the logs of very small numbers. Still, a larger log-probab.
+        # is a "higher score". For instance, -3 indicates a higher probability
+        # than -223802.
+        curr_score = self.languageModel.score(trialSentence)
+        if (bestScore < curr_score):
+          bestScore = curr_score
+          bestSentence = trialSentence
+
+      #
+      # Tip: self.editModel.editProbabilities(word) gives edits and
+      # log-probabilities according to your edit model. You should iterate
+      # through these values instead of enumerating all edits.
+      #
+      # Tip: self.languageModel.score(trialSentence) gives log-probability
+      # of a sentence
+
+    # print self.languageModel.score(' '.join(bestSentence))
+    # print(bestSentence)
+
+    print ('\n----------\n')
     return bestSentence
 
   # Tests this speller on a corpus, returns a SpellingResult
@@ -78,7 +106,7 @@ class SpellCorrect:
     output = '[%s]' % ','.join(string_list)
     return output
 
-    
+
 ##
 # Trains all of the language models and tests them on the dev data.
 # Change devPath if you wish to do things like test on the training
@@ -96,35 +124,35 @@ def main():
   unigramOutcome = unigramSpell.evaluate(devCorpus)
   print str(unigramOutcome)
 
-  print 'Uniform Language Model: '
-  uniformLM = UniformLanguageModel(trainingCorpus)
-  uniformSpell = SpellCorrect(uniformLM, trainingCorpus)
-  uniformOutcome = uniformSpell.evaluate(devCorpus) 
-  print str(uniformOutcome)
+  # print 'Uniform Language Model: '
+  # uniformLM = UniformLanguageModel(trainingCorpus)
+  # uniformSpell = SpellCorrect(uniformLM, trainingCorpus)
+  # uniformOutcome = uniformSpell.evaluate(devCorpus) 
+  # print str(uniformOutcome)
 
-  print 'Laplace Unigram Language Model: ' 
-  laplaceUnigramLM = LaplaceUnigramLanguageModel(trainingCorpus)
-  laplaceUnigramSpell = SpellCorrect(laplaceUnigramLM, trainingCorpus)
-  laplaceUnigramOutcome = laplaceUnigramSpell.evaluate(devCorpus)
-  print str(laplaceUnigramOutcome)
+  # print 'Laplace Unigram Language Model: ' 
+  # laplaceUnigramLM = LaplaceUnigramLanguageModel(trainingCorpus)
+  # laplaceUnigramSpell = SpellCorrect(laplaceUnigramLM, trainingCorpus)
+  # laplaceUnigramOutcome = laplaceUnigramSpell.evaluate(devCorpus)
+  # print str(laplaceUnigramOutcome)
 
-  print 'Laplace Bigram Language Model: '
-  laplaceBigramLM = LaplaceBigramLanguageModel(trainingCorpus)
-  laplaceBigramSpell = SpellCorrect(laplaceBigramLM, trainingCorpus)
-  laplaceBigramOutcome = laplaceBigramSpell.evaluate(devCorpus)
-  print str(laplaceBigramOutcome)
+  # print 'Laplace Bigram Language Model: '
+  # laplaceBigramLM = LaplaceBigramLanguageModel(trainingCorpus)
+  # laplaceBigramSpell = SpellCorrect(laplaceBigramLM, trainingCorpus)
+  # laplaceBigramOutcome = laplaceBigramSpell.evaluate(devCorpus)
+  # print str(laplaceBigramOutcome)
 
-  print 'Stupid Backoff Language Model: '  
-  sbLM = StupidBackoffLanguageModel(trainingCorpus)
-  sbSpell = SpellCorrect(sbLM, trainingCorpus)
-  sbOutcome = sbSpell.evaluate(devCorpus)
-  print str(sbOutcome)
+  # print 'Stupid Backoff Language Model: '  
+  # sbLM = StupidBackoffLanguageModel(trainingCorpus)
+  # sbSpell = SpellCorrect(sbLM, trainingCorpus)
+  # sbOutcome = sbSpell.evaluate(devCorpus)
+  # print str(sbOutcome)
 
-  print 'Custom Language Model: '
-  customLM = CustomLanguageModel(trainingCorpus)
-  customSpell = SpellCorrect(customLM, trainingCorpus)
-  customOutcome = customSpell.evaluate(devCorpus)
-  print str(customOutcome)
+  # print 'Custom Language Model: '
+  # customLM = CustomLanguageModel(trainingCorpus)
+  # customSpell = SpellCorrect(customLM, trainingCorpus)
+  # customOutcome = customSpell.evaluate(devCorpus)
+  # print str(customOutcome)
 
 if __name__ == "__main__":
     main()

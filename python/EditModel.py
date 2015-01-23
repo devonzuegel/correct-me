@@ -121,8 +121,6 @@ class EditModel(object):
   # Returns a list of edits of 1-replace distance words and rules used to
   # generate them.
   def replaceEdits(self, word):
-    # TODO: write this
-    # Tip: you might find EditModel.ALPHABET helpful
     # Tip: If replacing the letter 'e' with 'q' in the word 'test', the corrupt signal is 'e'
     #      and the correct signal is 'q'. See slide 17 of the noisy channel model.
     #
