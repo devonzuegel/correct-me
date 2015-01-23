@@ -26,12 +26,6 @@ class Sentence:
 
   # Checks if a list of strings is a correction of this sentence.
   def isCorrection(self, candidate):
-    # solution = ''
-    # for i in range(0,len(self.data)): 
-    #   solution += str(self.data[i]) + ' '
-    # print self.data
-    # print candidate
-    # print ''
     if len(self.data) != len(candidate):
       return False
     for i in range(0,len(self.data)):

@@ -42,16 +42,6 @@ class SpellCorrect:
     # Tip: self.languageModel.score(trialSentence) gives log-probability
       # of a sentence
 
-    ## Approach: ##
-    # iterate through the sentence
-    #   get the probabilities for each word
-    #   iterate through the edit options for each word
-    #     find the edit with the highest probability
-    #     plug that into the sentence
-    #     if the score of that sentence > score of the sentence without the swap
-    #       keep it as bestSentence
-
-
     if len(sentence) == 0:      return []
 
     bestSentence = sentence[:]   # copy of sentence
@@ -69,6 +59,8 @@ class SpellCorrect:
           # taking the logs of very small numbers. Still, a larger log-probab.
           # is a "higher score". For instance, -3 indicates a higher probability
           # than -223802.
+        # Must get sum (rather than product) of languageModel.score &
+          # edit probability because they are logs.
         curr_score = self.languageModel.score(trialSentence) + edit[1]
         if (bestScore < curr_score):
           bestScore = curr_score
@@ -119,23 +111,23 @@ def main():
   devPath = '../data/holbrook-tagged-dev.dat'
   devCorpus = HolbrookCorpus(devPath)
 
-  print 'Unigram Language Model: ' 
-  unigramLM = UnigramLanguageModel(trainingCorpus)
-  unigramSpell = SpellCorrect(unigramLM, trainingCorpus)
-  unigramOutcome = unigramSpell.evaluate(devCorpus)
-  print str(unigramOutcome)
+  # print 'Unigram Language Model: ' 
+  # unigramLM = UnigramLanguageModel(trainingCorpus)
+  # unigramSpell = SpellCorrect(unigramLM, trainingCorpus)
+  # unigramOutcome = unigramSpell.evaluate(devCorpus)
+  # print str(unigramOutcome)
 
-  print 'Uniform Language Model: '
-  uniformLM = UniformLanguageModel(trainingCorpus)
-  uniformSpell = SpellCorrect(uniformLM, trainingCorpus)
-  uniformOutcome = uniformSpell.evaluate(devCorpus) 
-  print str(uniformOutcome)
+  # print 'Uniform Language Model: '
+  # uniformLM = UniformLanguageModel(trainingCorpus)
+  # uniformSpell = SpellCorrect(uniformLM, trainingCorpus)
+  # uniformOutcome = uniformSpell.evaluate(devCorpus) 
+  # print str(uniformOutcome)
 
-  # print 'Laplace Unigram Language Model: ' 
-  # laplaceUnigramLM = LaplaceUnigramLanguageModel(trainingCorpus)
-  # laplaceUnigramSpell = SpellCorrect(laplaceUnigramLM, trainingCorpus)
-  # laplaceUnigramOutcome = laplaceUnigramSpell.evaluate(devCorpus)
-  # print str(laplaceUnigramOutcome)
+  print 'Laplace Unigram Language Model: ' 
+  laplaceUnigramLM = LaplaceUnigramLanguageModel(trainingCorpus)
+  laplaceUnigramSpell = SpellCorrect(laplaceUnigramLM, trainingCorpus)
+  laplaceUnigramOutcome = laplaceUnigramSpell.evaluate(devCorpus)
+  print str(laplaceUnigramOutcome)
 
   # print 'Laplace Bigram Language Model: '
   # laplaceBigramLM = LaplaceBigramLanguageModel(trainingCorpus)
