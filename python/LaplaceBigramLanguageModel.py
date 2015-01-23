@@ -21,7 +21,6 @@ class LaplaceBigramLanguageModel:
     for sentence in corpus.corpus:
       for i in range(0, len(sentence.data) - 1):  # ignore </s> at end
         token = bigram_at(sentence.data, i)
-
         self.bigramCounts[token] += 1
         self.total += 1
 
@@ -32,7 +31,7 @@ class LaplaceBigramLanguageModel:
       self.bigramCounts[token] += 1
       self.total += 1
 
-  
+
   ##
   # Takes a list of strings, returns a log-probability score of that
   # sentence using data from train().
