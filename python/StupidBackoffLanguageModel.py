@@ -14,7 +14,6 @@ class StupidBackoffLanguageModel:
     self.unigramCounts = collections.defaultdict(lambda: 0)
     self.unigram_total = 0
     self.bigramCounts = collections.defaultdict(lambda: 0)
-    self.bigram_total = 0
     self.train(corpus)
 
 
@@ -27,7 +26,6 @@ class StupidBackoffLanguageModel:
       for i in range(0, len(sentence.data) - 1):  # ignore </s> at end
         token = bigram_at(sentence.data, i)
         self.bigramCounts[token] += 1
-        self.bigram_total += 1
 
       # Populate unigram counts & total
       for datum in sentence.data:
@@ -37,23 +35,18 @@ class StupidBackoffLanguageModel:
 
 
     # --- LAPLACE SMOOTHING ---------------
+    # Increment each token & the unigram_total by 1
 
     ### UNIGRAM LAPLACE SMOOTHING ###
-
     self.unigramCounts['UNK'] = 0
-    # For each token, increment by 1 for Laplace smoothing
     for token in self.unigramCounts:
       self.unigramCounts[token] += 1
       self.unigram_total += 1
 
-
     ### BIGRAM LAPLACE SMOOTHING ###
-
     self.bigramCounts['UNK'] = 0
-    # For each token, increment by 1 for Laplace smoothing
     for token in self.bigramCounts:
       self.bigramCounts[token] += 1
-      self.bigram_total += 1
 
 
   ##
@@ -66,15 +59,14 @@ class StupidBackoffLanguageModel:
       bigram_token = '%s %s' % (sentence[i], sentence[i+1])
       bigram_count = self.bigramCounts[bigram_token]
 
-      unigram_token = sentence[i]
-      unigram_count = self.unigramCounts[unigram_token]
+      prev_word = sentence[i]
+      prev_word_count = self.unigramCounts[prev_word]
 
       if bigram_count > 0:
-        score += math.log(bigram_count) - math.log(unigram_count)
+        score += math.log(bigram_count) - math.log(prev_word_count)
       else:
-        unk_count = self.unigramCounts[sentence[i+1]]
-        # print '%d  %d  %d' % (unigram_count)
-        score += math.log(unk_count + 1) -            \
+        unigram_count = self.unigramCounts[sentence[i+1]]
+        score += math.log(unigram_count + 1) -        \
                  math.log(self.unigram_total) +       \
                  math.log(0.4)
 
