@@ -13,7 +13,9 @@ class StupidBackoffLanguageModel:
   def __init__(self, corpus):
     self.unigramCounts = collections.defaultdict(lambda: 0)
     self.unigram_total = 0
+    
     self.bigramCounts = collections.defaultdict(lambda: 0)
+
     self.train(corpus)
 
 
@@ -22,16 +24,16 @@ class StupidBackoffLanguageModel:
     # --- UNIGRAM & BIGRAM COUNTS ---------------
 
     for sentence in corpus.corpus:
-      # Populate bigram counts & total
-      for i in range(0, len(sentence.data) - 1):  # ignore </s> at end
-        token = bigram_at(sentence.data, i)
-        self.bigramCounts[token] += 1
-
       # Populate unigram counts & total
       for datum in sentence.data:
         token = datum.word
         self.unigramCounts[token] += 1
         self.unigram_total += 1
+
+      # Populate bigram counts & total
+      for i in range(0, len(sentence.data) - 1):  # ignore </s> at end
+        token = bigram_at(sentence.data, i)
+        self.bigramCounts[token] += 1
 
 
     # --- LAPLACE SMOOTHING ---------------
